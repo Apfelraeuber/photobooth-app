@@ -223,6 +223,31 @@ class VideoProcessing(BaseModel):
     )
 
 
+class DirectPrinting(BaseModel):
+    """Configure stages how to process images after capture."""
+
+    model_config = ConfigDict(title="Direct printing configuration")
+
+    printer_enable: bool = Field(
+        default=False,
+        description="Enable direct printing of images after capture.",
+    )
+    printer_name: str = Field(
+        default="",
+        description="Name of the printer to use for direct printing.",
+    )
+    printer_print_command: str = Field(
+        default="",
+        description="Command to print the image. Use {file} as placeholder for the image file. {printer} will be replaced with the printer name.",
+    )
+    printer_print_timeout: int = Field(
+        default=30,
+        ge=1,
+        le=60,
+        description="Timeout in seconds to wait for the printer to finish the print job.",
+    )
+
+
 class SingleImageConfigurationSet(BaseModel):
     """Configure stages how to process images after capture."""
 
@@ -236,6 +261,7 @@ class SingleImageConfigurationSet(BaseModel):
     jobcontrol: SingleImageJobControl
     processing: SingleImageProcessing
     trigger: Trigger
+    printing: DirectPrinting
 
 
 class CollageConfigurationSet(BaseModel):
@@ -251,6 +277,7 @@ class CollageConfigurationSet(BaseModel):
     jobcontrol: MultiImageJobControl
     processing: CollageProcessing
     trigger: Trigger
+    printing: DirectPrinting
 
 
 class AnimationConfigurationSet(BaseModel):
@@ -315,6 +342,9 @@ class GroupActions(BaseModel):
                     gpio_trigger=GpioTrigger(pin="27"),
                     keyboard_trigger=KeyboardTrigger(keycode="i"),
                 ),
+                printing=DirectPrinting(
+                    printer_enable=False, printer_name="Canon_SELPHY_CP1300", printer_print_command="lp -d {printer} {file}", printer_print_timeout=30
+                ),
             ),
         ],
         description="Capture single images.",
@@ -376,6 +406,9 @@ class GroupActions(BaseModel):
                     ui_trigger=UiTrigger(title="Collage", icon="o_auto_awesome_mosaic"),
                     gpio_trigger=GpioTrigger(pin="22"),
                     keyboard_trigger=KeyboardTrigger(keycode="c"),
+                ),
+                printing=DirectPrinting(
+                    printer_enable=False, printer_name="Canon_SELPHY_CP1300", printer_print_command="lp -d {printer} {file}", printer_print_timeout=30
                 ),
             )
         ],
